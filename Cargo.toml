@@ -2,6 +2,7 @@
 name = "easytradeview"
 version = "0.1.0"
 edition = "2021"
+license = "Apache-2.0"
 repository = "https://github.com/baiihcy/easytradeview"
 keywords = ["trading-view", "trade-data", "technical-analysis", "ta"]
 description = "A Rust-based wrapper library for the TradingView website's API, providing easy access to live trading data and indicators without requiring login credentials."
