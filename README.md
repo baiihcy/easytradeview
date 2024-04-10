@@ -1,5 +1,5 @@
 # EasyTradeView
-EasyTradingView is a wrapper around the TradingView website's API. It allows users to fetch real-time trading data and technological analysis without the need for logging in or authentication.
+EasyTradeView is a wrapper around the TradingView website's API. It allows users to fetch real-time trading data and technological analysis without the need for logging in or authentication.
 
 ## Features
 - **Real-time Trading Data**: Retrieve real-time trading data across multiple exchanges, query multiple stocks at once, and customize data columns.
@@ -7,10 +7,10 @@ EasyTradingView is a wrapper around the TradingView website's API. It allows use
 - **No Authentication Required**: Use the API functionalities without the need for any login credentials.
 
 ## Installation
-Add `EasyTradingView` to your Rust project's `Cargo.toml`:
+Add `EasyTradeView` to your Rust project's `Cargo.toml`:
 ```toml
 [dependencies]
-easytradingview = "0.1.0"
+easytradeview = "0.1.0"
 ```
 ## Usage
 For usage examples, please see the examples directory within this repository. 
