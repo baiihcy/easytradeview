@@ -1,0 +1,21 @@
+[package]
+name = "easytradeview"
+version = "0.1.0"
+edition = "2021"
+repository = "https://github.com/baiihcy/easytradeview"
+keywords = ["trading-view", "trade-data", "technical-analysis", "ta"]
+description = "A Rust-based wrapper library for the TradingView website's API, providing easy access to live trading data and indicators without requiring login credentials."
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.81"
+clap = { version = "4.5.4", features = ["derive"] }
+reqwest = { version = "0.12.3", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.113"
+strum = "0.26.1"
+strum_macros = "0.26.2"
+tokio = { version = "1.36.0", features = ["full"]}
+tokio-tungstenite = { version = "0.21.0", features = ["native-tls"]}
+url = "2.5.0"
