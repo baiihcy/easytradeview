@@ -236,7 +236,7 @@ async fn main() -> Result<()> {
             }
         }
         SubCommand::ListScreeners => {
-            for screener in Screener::all() {
+            for screener in Screener::all_screeners() {
                 println!("{:?}", screener);
             }
         }
