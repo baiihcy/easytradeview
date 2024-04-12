@@ -14,24 +14,33 @@ pub struct TradingView {
 
 impl TradingView {
     /// Creates a new TradingView instance.
-    pub fn new<S: AsRef<str>>(screener: &Screener, exchange: S) -> TradingView {
+    pub fn new<S1, S2>(screener: S1, exchange: S2) -> TradingView
+    where
+        S1: AsRef<str>,
+        S2: AsRef<str>,
+    {
         Self {
-            screener: screener.as_str_ref().to_lowercase(),
+            screener: screener.as_ref().to_lowercase(),
             exchange: exchange.as_ref().to_owned(),
             client: reqwest::Client::new(),
         }
     }
 
     /// Retrieves the specified fields for a given symbol, with all fields sharing the same interval.
-    pub async fn get_symbol_fields<S: AsRef<str>>(
+    pub async fn get_symbol_fields<S1, S2>(
         &self,
-        symbol: S,
-        interval: &Interval,
+        symbol: S1,
+        interval: S2,
         fields: &[Field],
-    ) -> Result<SimpleSymbolValues> {
+    ) -> Result<SimpleSymbolValues>
+    where
+        S1: AsRef<str>,
+        S2: AsRef<str>,
+    {
         let mut url = Url::parse(SCANNER_URL)?.join("symbol")?;
 
         let symbol = self.exchange.clone() + ":" + symbol.as_ref();
+        let interval = Interval::parse_undefined(interval.as_ref());
         let fields: Vec<String> = fields
             .iter()
             .map(|x| x.to_string_with_interval(&interval))
@@ -61,11 +70,14 @@ impl TradingView {
     }
 
     /// Retrieves the specified fields for a given symbol, each field with its own interval.
-    pub async fn get_symbol_fields_with_interval<S: AsRef<str>>(
+    pub async fn get_symbol_fields_with_interval<S>(
         &self,
         symbol: S,
         fields: &[FieldWithInterval],
-    ) -> Result<TimedSymbolValues> {
+    ) -> Result<TimedSymbolValues>
+    where
+        S: AsRef<str>,
+    {
         let mut url = Url::parse(SCANNER_URL)?.join("symbol")?;
 
         let symbol = self.exchange.clone() + ":" + symbol.as_ref();
@@ -95,12 +107,16 @@ impl TradingView {
     }
 
     /// Searches for symbols by given exchanges and types. Retrieves basic fields along with specified extra fields.
-    pub async fn search_symbols<S1: AsRef<str>, S2: AsRef<str>>(
+    pub async fn search_symbols<S1, S2>(
         &self,
-        exchanges: &[S2],
-        types: &[S1],
+        exchanges: &[S1],
+        types: &[S2],
         extra_fields: &[FieldWithInterval],
-    ) -> Result<Vec<TimedSymbolValues>> {
+    ) -> Result<Vec<TimedSymbolValues>>
+    where
+        S1: AsRef<str>,
+        S2: AsRef<str>,
+    {
         let url = Url::parse(SCANNER_URL)?
             .join(&format!("{}/", self.screener))?
             .join("scan")?;
@@ -157,11 +173,14 @@ impl TradingView {
     }
 
     /// Retrieves the specified fields for the given symbols, each field with its own interval.
-    pub async fn scan_symbols<T: AsRef<str>>(
+    pub async fn scan_symbols<S>(
         &self,
-        symbols: &[T],
+        symbols: &[S],
         fields: &[FieldWithInterval],
-    ) -> Result<Vec<TimedSymbolValues>> {
+    ) -> Result<Vec<TimedSymbolValues>>
+    where
+        S: AsRef<str>,
+    {
         let url = Url::parse(SCANNER_URL)?
             .join(&format!("{}/", self.screener))?
             .join("scan")?;
@@ -213,7 +232,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_symbol_fields() -> Result<()> {
-        let tradingview = TradingView::new(&Screener::Crypto, "OKX");
+        let tradingview = TradingView::new(Screener::Crypto, "OKX");
         let interval = Interval::Hour1;
         let fields: Vec<Field> = vec![]
             .iter()
@@ -232,7 +251,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_symbol_fields_with_interval() -> Result<()> {
-        let tradingview = TradingView::new(&Screener::Crypto, "OKX");
+        let tradingview = TradingView::new(Screener::Crypto, "OKX");
         let interval = Interval::Hour1;
         let fields: Vec<FieldWithInterval> = vec![]
             .into_iter()
@@ -252,17 +271,17 @@ mod tests {
 
     #[tokio::test]
     async fn test_search_symbols() -> Result<()> {
-        let tradingview = TradingView::new(&Screener::Hongkong, "");
+        let tradingview = TradingView::new(&Screener::Crypto, "");
         let interval = Interval::Hour1;
-        let types: Vec<&str> = vec!["stock", "fund"];
-        let exchanges: Vec<&str> = vec![""];
+        let exchanges: Vec<&str> = vec!["OKX"];
+        let types: Vec<&str> = vec!["spot"];
         let extra_fields: Vec<FieldWithInterval> =
             vec![Field::Open, Field::Close, Field::ChangeFromOpen]
                 .into_iter()
                 .map(|x| x.with_interval(&interval))
                 .collect();
         let data = tradingview
-            .search_symbols(&types, &exchanges, extra_fields.as_slice())
+            .search_symbols(&exchanges, &types, extra_fields.as_slice())
             .await
             .context("search symbols error")?;
 
@@ -272,7 +291,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_scan_symbols() -> Result<()> {
-        let tradingview = TradingView::new(&Screener::Crypto, "OKX");
+        let tradingview = TradingView::new(Screener::Crypto, "OKX");
         let interval = Interval::Hour1;
         let symbols = ["BTCUSDT.P"];
         let fields: Vec<FieldWithInterval> = vec![Field::Name, Field::Exchange, Field::SubType]

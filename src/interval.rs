@@ -21,23 +21,6 @@ impl Interval {
         Interval::Undefined(s.to_owned())
     }
 
-    /// Get the string representation of the interval.
-    pub fn as_str_ref(&self) -> &str {
-        if let Interval::Undefined(x) = self {
-            x
-        } else {
-            self.as_ref()
-        }
-    }
-
-    /// Get the string representation of the interval as a suffix for a field.
-    pub fn as_field_suffix(&self) -> String {
-        match self {
-            Interval::Day1 => "".to_owned(),
-            _ => "|".to_owned() + self.as_str_ref(),
-        }
-    }
-
     /// Parses an interval from a string.
     pub fn parse(s: &str) -> Result<Interval> {
         match s {
@@ -54,9 +37,32 @@ impl Interval {
         }
     }
 
-    /// Parses an interval from a string, or return the default if it fails.
-    pub fn parse_or_default(s: &str) -> Interval {
-        Self::parse(s).unwrap_or_default()
+    /// Parses an interval from a string, or return the undefined interval if it fails.
+    pub fn parse_undefined(s: &str) -> Interval {
+        Self::parse(s).unwrap_or(Self::undefined(s))
+    }
+
+    /// Get the string representation of the interval as a suffix for a field.
+    pub fn as_field_suffix(&self) -> String {
+        match self {
+            Interval::Day1 => "".to_owned(),
+            _ => "|".to_owned() + self.as_ref(),
+        }
+    }
+
+    pub fn all_intervals() -> &'static [Interval] {
+        &[
+            Interval::Min1,
+            Interval::Min5,
+            Interval::Min15,
+            Interval::Min30,
+            Interval::Hour1,
+            Interval::Hour2,
+            Interval::Hour4,
+            Interval::Day1,
+            Interval::Week1,
+            Interval::Month1,
+        ]
     }
 }
 

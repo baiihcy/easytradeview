@@ -13,10 +13,16 @@ struct Opts {
 
 #[derive(Subcommand)]
 enum SubCommand {
+    /// Searches for symbols by given exchanges and types.
     Search(SerachArgs),
+    /// Retrieves the specified fields for the given symbols.
     Scan(ScanArgs),
+    /// Retrieves the specified fields for a given symbol.
     Get(GetArgs),
+    /// List all known screeners.
     ListScreeners,
+    /// List all known intervals.
+    ListIntervals,
 }
 
 #[derive(Debug, Args)]
@@ -79,7 +85,7 @@ async fn main() -> Result<()> {
     match opts.subcmd {
         SubCommand::Search(args) => {
             // Parse arguments
-            let screener = Screener::parse_undefined(&args.screener);
+            let screener = args.screener;
             let exchanges = args.exchanges;
             let types = args.types;
             // Prepare extra fields if specified
@@ -138,10 +144,9 @@ async fn main() -> Result<()> {
         }
         SubCommand::Scan(args) => {
             // Parse arguments
-            let screener = Screener::parse_undefined(&args.screener);
+            let screener = args.screener;
             let exchange = args.exchange;
-            let interval =
-                Interval::parse(&args.default_interval).context("parse interval error")?;
+            let interval = Interval::parse_undefined(&args.default_interval);
             let symbols = args.symbols;
             // Prepare fields with default intervals if not specified
             let fields = args
@@ -187,9 +192,9 @@ async fn main() -> Result<()> {
         }
         SubCommand::Get(args) => {
             // Parse arguments
-            let screener = Screener::parse_undefined(&args.screener);
+            let screener = args.screener;
             let exchange = args.exchange;
-            let interval = Interval::parse(&args.interval).context("Failed to parse interval")?;
+            let interval = Interval::parse_undefined(&args.interval);
             let symbol = args.symbol;
             // Prepare fields with default intervals if not specified
             let fields = args
@@ -220,7 +225,10 @@ async fn main() -> Result<()> {
 
             // Output data, formatted as JSON if specified, else as plain key-value pairs
             if args.json {
-                println!("{}", serde_json::to_string_pretty(&values.into_iter().collect::<HashMap<_, _>>())?);
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(&values.into_iter().collect::<HashMap<_, _>>())?
+                );
             } else {
                 for (k, v) in values {
                     println!("{:>13} : {}", k, v.to_string());
@@ -230,6 +238,11 @@ async fn main() -> Result<()> {
         SubCommand::ListScreeners => {
             for screener in Screener::all() {
                 println!("{:?}", screener);
+            }
+        }
+        SubCommand::ListIntervals => {
+            for interval in Interval::all_intervals() {
+                println!("{}", interval);
             }
         }
     };

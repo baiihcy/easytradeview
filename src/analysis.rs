@@ -215,13 +215,17 @@ impl Analysis {
     }
 
     /// Retrieves symbol values for the given symbol from `tradingview` and computes technical analysis.
-    pub async fn get_technical_analysis<S: AsRef<str>>(
+    pub async fn get_technical_analysis<S1, S2>(
         tradingview: &TradingView,
-        symbol: S,
-        interval: &Interval,
-    ) -> Result<Analysis> {
+        symbol: S1,
+        interval: S2,
+    ) -> Result<Analysis> 
+    where
+        S1: AsRef<str>,
+        S2: AsRef<str>,
+    {
         let values = tradingview
-            .get_symbol_fields(&symbol, &interval, Analysis::ta_fields())
+            .get_symbol_fields(symbol, interval, Analysis::ta_fields())
             .await
             .context("get symbol fields error")?;
         Ok(Analysis::compute(&values.get_f64_values()))
@@ -594,9 +598,31 @@ impl Analysis {
 
 impl std::fmt::Display for Analysis {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{:>13} :  {:>11}({:>5.2})  {}", "SUMMARY", self.recommend_summary, self.signal_summary, self.counter_summary)
-            .and_then(|_| writeln!(f, "{:>13} :  {:>11}({:>5.2})  {}", "OSCILLATORS", self.recommend_oscillators, self.signal_oscillators, self.counter_oscillators))
-            .and_then(|_| writeln!(f, "{:>13} :  {:>11}({:>5.2})  {}", "MOVE_AVERAGES", self.recommend_move_averages, self.signal_move_averages, self.counter_move_averages))
+        writeln!(
+            f,
+            "{:>13} :  {:>11}({:>5.2})  {}",
+            "SUMMARY", self.recommend_summary, self.signal_summary, self.counter_summary
+        )
+        .and_then(|_| {
+            writeln!(
+                f,
+                "{:>13} :  {:>11}({:>5.2})  {}",
+                "OSCILLATORS",
+                self.recommend_oscillators,
+                self.signal_oscillators,
+                self.counter_oscillators
+            )
+        })
+        .and_then(|_| {
+            writeln!(
+                f,
+                "{:>13} :  {:>11}({:>5.2})  {}",
+                "MOVE_AVERAGES",
+                self.recommend_move_averages,
+                self.signal_move_averages,
+                self.counter_move_averages
+            )
+        })
     }
 }
 
@@ -619,7 +645,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_analysis_compute() -> Result<()> {
-        let tradingview = TradingView::new(&Screener::Crypto, "OKX");
+        let tradingview = TradingView::new(Screener::Crypto, "OKX");
         let symbol = "BTCUSDT.P";
         let interval = Interval::Hour1;
         let analysis = Analysis::get_technical_analysis(&tradingview, &symbol, &interval)
