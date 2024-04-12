@@ -1,25 +1,54 @@
 use super::*;
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use serde::Serialize;
+use std::str::FromStr;
 use std::{collections::HashMap, ops::Add};
-use strum_macros::{AsRefStr, Display, EnumString};
 
-#[derive(Debug, PartialEq, Clone, Copy, EnumString, Display, AsRefStr, Serialize)]
+#[derive(Debug, PartialEq, Clone, Copy, Serialize)]
 pub enum Recommendation {
-    #[strum(serialize = "STRONG_SELL")]
     StrongSell,
-    #[strum(serialize = "SELL")]
     Sell,
-    #[strum(serialize = "NEUTRAL")]
     Neutral,
-    #[strum(serialize = "BUY")]
     Buy,
-    #[strum(serialize = "STRONG_BUY")]
     StrongBuy,
 }
+
 impl Default for Recommendation {
     fn default() -> Self {
         Recommendation::Neutral
+    }
+}
+
+impl AsRef<str> for Recommendation {
+    fn as_ref(&self) -> &str {
+        match self {
+            Recommendation::StrongSell => "STRONG_SELL",
+            Recommendation::Sell => "SELL",
+            Recommendation::Neutral => "NEUTRAL",
+            Recommendation::Buy => "BUY",
+            Recommendation::StrongBuy => "STRONG_BUY",
+        }
+    }
+}
+
+impl std::fmt::Display for Recommendation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_ref())
+    }
+}
+
+impl FromStr for Recommendation {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "STRONG_SELL" => Ok(Recommendation::StrongSell),
+            "SELL" => Ok(Recommendation::Sell),
+            "NEUTRAL" => Ok(Recommendation::Neutral),
+            "BUY" => Ok(Recommendation::Buy),
+            "STRONG_BUF" => Ok(Recommendation::StrongBuy),
+            _ => Err(anyhow!("Invalid recommendation: {}", s)),
+        }
     }
 }
 
@@ -219,7 +248,7 @@ impl Analysis {
         tradingview: &TradingView,
         symbol: S1,
         interval: S2,
-    ) -> Result<Analysis> 
+    ) -> Result<Analysis>
     where
         S1: AsRef<str>,
         S2: AsRef<str>,

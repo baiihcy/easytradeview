@@ -1,377 +1,204 @@
 use super::*;
 use anyhow::{anyhow, Result};
+use field_attr::FieldAttr;
 pub use serde_json::Value;
-use std::str::FromStr;
-use strum_macros::{AsRefStr, EnumString};
 
-#[derive(Debug, Eq, PartialEq, Hash, Clone, EnumString, AsRefStr)]
+#[derive(Debug, Eq, PartialEq, Hash, Clone)]
 pub enum Field {
-    #[strum(serialize = "")]
     Undefined(String),
-    #[strum(serialize = "")]
     UndefinedWithoutInterval(String),
-    #[strum(serialize = "Recommend.Other")]
     RecommendOther,
-    #[strum(serialize = "Recommend.All")]
     RecommendAll,
-    #[strum(serialize = "Recommend.MA")]
     RecommendMA,
-    #[strum(serialize = "name")]
     Name,
-    #[strum(serialize = "exchange")]
     Exchange,
-    #[strum(serialize = "description")]
     Description,
-    #[strum(serialize = "type")]
     Type,
-    #[strum(serialize = "subtype")]
     SubType,
-    #[strum(serialize = "update_mode")]
     UpdateMode,
-    #[strum(serialize = "pricescale")]
     PriceScale,
-    #[strum(serialize = "minmov")]
     MinMov,
-    #[strum(serialize = "minmove2")]
     MinMove2,
-    #[strum(serialize = "fractional")]
     Fractional,
-    #[strum(serialize = "open")]
     Open,
-    #[strum(serialize = "close")]
     Close,
-    #[strum(serialize = "volume")]
     Volume,
-    #[strum(serialize = "change")]
     Change,
-    #[strum(serialize = "change_abs")]
     ChangeAbs,
-    #[strum(serialize = "gap")]
     Gap,
-    #[strum(serialize = "High.W")]
     HighW,
-    #[strum(serialize = "Low.W")]
     LowW,
-    #[strum(serialize = "Perf.W")]
     PerfW,
-    #[strum(serialize = "High.1M")]
     High1M,
-    #[strum(serialize = "Low.1M")]
     Low1M,
-    #[strum(serialize = "Perf.1M")]
     Perf1M,
-    #[strum(serialize = "High.3M")]
     High3M,
-    #[strum(serialize = "Low.3M")]
     Low3M,
-    #[strum(serialize = "Perf.3M")]
     Perf3M,
-    #[strum(serialize = "High.6M")]
     High6M,
-    #[strum(serialize = "Low.6M")]
     Low6M,
-    #[strum(serialize = "Perf.6M")]
     Perf6M,
-    #[strum(serialize = "High.All")]
     HighAll,
-    #[strum(serialize = "Low.All")]
     LowAll,
-    #[strum(serialize = "RSI")]
     RSI,
-    #[strum(serialize = "RSI[1]")]
     RSI1,
-    #[strum(serialize = "RSI7")]
     RSI7,
-    #[strum(serialize = "Stoch.K")]
     StochK,
-    #[strum(serialize = "Stoch.D")]
     StochD,
-    #[strum(serialize = "Stoch.K[1]")]
     StochK1,
-    #[strum(serialize = "Stoch.D[1]")]
     StochD1,
-    #[strum(serialize = "CCI20")]
     CCI20,
-    #[strum(serialize = "CCI20[1]")]
     CCI201,
-    #[strum(serialize = "ADX")]
     ADX,
-    #[strum(serialize = "ADX+DI")]
     ADXplusDI,
-    #[strum(serialize = "ADX-DI")]
     ADXminusDI,
-    #[strum(serialize = "ADX+DI[1]")]
     ADXplusDI1,
-    #[strum(serialize = "ADX-DI[1]")]
     ADXminusDI1,
-    #[strum(serialize = "AO")]
     AO,
-    #[strum(serialize = "AO[1]")]
     AO1,
-    #[strum(serialize = "AO[2]")]
     AO2,
-    #[strum(serialize = "Mom")]
     Mom,
-    #[strum(serialize = "Mom[1]")]
     Mom1,
-    #[strum(serialize = "MACD.macd")]
     MACDmacd,
-    #[strum(serialize = "MACD.signal")]
     MACDsignal,
-    #[strum(serialize = "Rec.Stoch.RSI")]
     RecStochRSI,
-    #[strum(serialize = "Stoch.RSI.K")]
     StochRSIK,
-    #[strum(serialize = "Stoch.RSI.D")]
     StochRSID,
-    #[strum(serialize = "Rec.WR")]
     RecWR,
-    #[strum(serialize = "W.R")]
     WR,
-    #[strum(serialize = "Rec.BBPower")]
     RecBBPower,
-    #[strum(serialize = "BBPower")]
     BBPower,
-    #[strum(serialize = "Rec.UO")]
     RecUO,
-    #[strum(serialize = "UO")]
     UO,
-    #[strum(serialize = "EMA5")]
     EMA5,
-    #[strum(serialize = "SMA5")]
     SMA5,
-    #[strum(serialize = "EMA10")]
     EMA10,
-    #[strum(serialize = "SMA10")]
     SMA10,
-    #[strum(serialize = "EMA20")]
     EMA20,
-    #[strum(serialize = "SMA20")]
     SMA20,
-    #[strum(serialize = "EMA30")]
     EMA30,
-    #[strum(serialize = "SMA30")]
     SMA30,
-    #[strum(serialize = "EMA50")]
     EMA50,
-    #[strum(serialize = "SMA50")]
     SMA50,
-    #[strum(serialize = "EMA100")]
     EMA100,
-    #[strum(serialize = "SMA100")]
     SMA100,
-    #[strum(serialize = "EMA200")]
     EMA200,
-    #[strum(serialize = "SMA200")]
     SMA200,
-    #[strum(serialize = "Rec.Ichimoku")]
     RecIchimoku,
-    #[strum(serialize = "Ichimoku.BLine")]
     IchimokuBLine,
-    #[strum(serialize = "Rec.VWMA")]
     RecVWMA,
-    #[strum(serialize = "VWMA")]
     VWMA,
-    #[strum(serialize = "Rec.HullMA9")]
     RecHullMA9,
-    #[strum(serialize = "HullMA9")]
     HullMA9,
-    #[strum(serialize = "Pivot.M.Classic.S3")]
     PivotMClassicS3,
-    #[strum(serialize = "Pivot.M.Classic.S2")]
     PivotMClassicS2,
-    #[strum(serialize = "Pivot.M.Classic.S1")]
     PivotMClassicS1,
-    #[strum(serialize = "Pivot.M.Classic.Middle")]
     PivotMClassicMiddle,
-    #[strum(serialize = "Pivot.M.Classic.R1")]
     PivotMClassicR1,
-    #[strum(serialize = "Pivot.M.Classic.R2")]
     PivotMClassicR2,
-    #[strum(serialize = "Pivot.M.Classic.R3")]
     PivotMClassicR3,
-    #[strum(serialize = "Pivot.M.Fibonacci.S3")]
     PivotMFibonacciS3,
-    #[strum(serialize = "Pivot.M.Fibonacci.S2")]
     PivotMFibonacciS2,
-    #[strum(serialize = "Pivot.M.Fibonacci.S1")]
     PivotMFibonacciS1,
-    #[strum(serialize = "Pivot.M.Fibonacci.Middle")]
     PivotMFibonacciMiddle,
-    #[strum(serialize = "Pivot.M.Fibonacci.R1")]
     PivotMFibonacciR1,
-    #[strum(serialize = "Pivot.M.Fibonacci.R2")]
     PivotMFibonacciR2,
-    #[strum(serialize = "Pivot.M.Fibonacci.R3")]
     PivotMFibonacciR3,
-    #[strum(serialize = "Pivot.M.Camarilla.S3")]
     PivotMCamarillaS3,
-    #[strum(serialize = "Pivot.M.Camarilla.S2")]
     PivotMCamarillaS2,
-    #[strum(serialize = "Pivot.M.Camarilla.S1")]
     PivotMCamarillaS1,
-    #[strum(serialize = "Pivot.M.Camarilla.Middle")]
     PivotMCamarillaMiddle,
-    #[strum(serialize = "Pivot.M.Camarilla.R1")]
     PivotMCamarillaR1,
-    #[strum(serialize = "Pivot.M.Camarilla.R2")]
     PivotMCamarillaR2,
-    #[strum(serialize = "Pivot.M.Camarilla.R3")]
     PivotMCamarillaR3,
-    #[strum(serialize = "Pivot.M.Woodie.S3")]
     PivotMWoodieS3,
-    #[strum(serialize = "Pivot.M.Woodie.S2")]
     PivotMWoodieS2,
-    #[strum(serialize = "Pivot.M.Woodie.S1")]
     PivotMWoodieS1,
-    #[strum(serialize = "Pivot.M.Woodie.Middle")]
     PivotMWoodieMiddle,
-    #[strum(serialize = "Pivot.M.Woodie.R1")]
     PivotMWoodieR1,
-    #[strum(serialize = "Pivot.M.Woodie.R2")]
     PivotMWoodieR2,
-    #[strum(serialize = "Pivot.M.Woodie.R3")]
     PivotMWoodieR3,
-    #[strum(serialize = "Pivot.M.Demark.S1")]
     PivotMDemarkS1,
-    #[strum(serialize = "Pivot.M.Demark.Middle")]
     PivotMDemarkMiddle,
-    #[strum(serialize = "Pivot.M.Demark.R1")]
     PivotMDemarkR1,
-    #[strum(serialize = "P.SAR")]
     PSAR,
-    #[strum(serialize = "BB.lower")]
     BBlower,
-    #[strum(serialize = "BB.upper")]
     BBupper,
-    #[strum(serialize = "price_52_week_high")]
     Price52WeekHigh,
-    #[strum(serialize = "price_52_week_low")]
     Price52WeekLow,
-    #[strum(serialize = "Aroon.Down")]
     AroonDown,
-    #[strum(serialize = "Aroon.Up")]
     AroonUp,
-    #[strum(serialize = "ADR")]
     ADR,
-    #[strum(serialize = "ATR")]
     ATR,
-    #[strum(serialize = "average_volume_10d_calc")]
     AverageVolume10dCalc,
-    #[strum(serialize = "Perf.Y")]
     PerfY,
-    #[strum(serialize = "Perf.YTD")]
     PerfYTD,
-    #[strum(serialize = "average_volume_30d_calc")]
     AverageVolume30dCalc,
-    #[strum(serialize = "average_volume_60d_calc")]
     AverageVolume60dCalc,
-    #[strum(serialize = "average_volume_90d_calc")]
     AverageVolume90dCalc,
-    #[strum(serialize = "change_from_open_abs")]
     ChangeFromOpenAbs,
-    #[strum(serialize = "change_from_open")]
     ChangeFromOpen,
-    #[strum(serialize = "DonchCh20.Lower")]
     DonchCh20Lower,
-    #[strum(serialize = "DonchCh20.Upper")]
     DonchCh20Upper,
-    #[strum(serialize = "Ichimoku.CLine")]
     IchimokuCLine,
-    #[strum(serialize = "Ichimoku.Lead1")]
     IchimokuLead1,
-    #[strum(serialize = "Ichimoku.Lead2")]
     IchimokuLead2,
-    #[strum(serialize = "KltChnl.lower")]
     KltChnllower,
-    #[strum(serialize = "KltChnl.upper")]
     KltChnlupper,
-    #[strum(serialize = "market_cap_calc")]
     MarketCapCalc,
-    #[strum(serialize = "ROC")]
     ROC,
-    #[strum(serialize = "relative_volume_10d_calc")]
     RelativeVolume10dCalc,
-    #[strum(serialize = "Volatility.D")]
     VolatilityD,
-    #[strum(serialize = "Volatility.M")]
     VolatilityM,
-    #[strum(serialize = "Volatility.W")]
     VolatilityW,
-    #[strum(serialize = "VWAP")]
     VWAP,
-    #[strum(serialize = "Candle.AbandonedBaby.Bearish")]
     CandleAbandonedBabyBearish,
-    #[strum(serialize = "Candle.AbandonedBaby.Bullish")]
     CandleAbandonedBabyBullish,
-    #[strum(serialize = "Candle.Engulfing.Bearish")]
     CandleEngulfingBearish,
-    #[strum(serialize = "Candle.Harami.Bearish")]
     CandleHaramiBearish,
-    #[strum(serialize = "Candle.Engulfing.Bullish")]
     CandleEngulfingBullish,
-    #[strum(serialize = "Candle.Harami.Bullish")]
     CandleHaramiBullish,
-    #[strum(serialize = "Candle.Doji")]
     CandleDoji,
-    #[strum(serialize = "Candle.Doji.Dragonfly")]
     CandleDojiDragonfly,
-    #[strum(serialize = "Candle.EveningStar")]
     CandleEveningStar,
-    #[strum(serialize = "Candle.Doji.Gravestone")]
     CandleDojiGravestone,
-    #[strum(serialize = "Candle.Hammer")]
     CandleHammer,
-    #[strum(serialize = "Candle.HangingMan")]
     CandleHangingMan,
-    #[strum(serialize = "Candle.InvertedHammer")]
     CandleInvertedHammer,
-    #[strum(serialize = "Candle.Kicking.Bearish")]
     CandleKickingBearish,
-    #[strum(serialize = "Candle.Kicking.Bullish")]
     CandleKickingBullish,
-    #[strum(serialize = "Candle.LongShadow.Lower")]
     CandleLongShadowLower,
-    #[strum(serialize = "Candle.LongShadow.Upper")]
     CandleLongShadowUpper,
-    #[strum(serialize = "Candle.Marubozu.Black")]
     CandleMarubozuBlack,
-    #[strum(serialize = "Candle.Marubozu.White")]
     CandleMarubozuWhite,
-    #[strum(serialize = "Candle.MorningStar")]
     CandleMorningStar,
-    #[strum(serialize = "Candle.ShootingStar")]
     CandleShootingStar,
-    #[strum(serialize = "Candle.SpinningTop.Black")]
     CandleSpinningTopBlack,
-    #[strum(serialize = "Candle.SpinningTop.White")]
     CandleSpinningTopWhite,
-    #[strum(serialize = "Candle.3BlackCrows")]
     Candle3BlackCrows,
-    #[strum(serialize = "Candle.3WhiteSoldiers")]
     Candle3WhiteSoldiers,
-    #[strum(serialize = "Candle.TriStar.Bearish")]
     CandleTriStarBearish,
-    #[strum(serialize = "Candle.TriStar.Bullish")]
     CandleTriStarBullish,
 }
 
 impl Field {
     /// Parses a field from a string.
     pub fn parse(s: &str) -> Result<Field> {
-        Field::from_str(s).map_err(|_| anyhow!("Invalid field: {}", s))
+        FieldAttr::find_by_name(s)
+            .and_then(|x| Some(x.field.clone()))
+            .ok_or(anyhow!("Invalid field: {}", s))
     }
 
     /// Parses a field, returning an undefined field if it fails
     pub fn parse_undefined(s: &str) -> Field {
         let parts: Vec<&str> = s.split("|").collect();
         let undefined_func = if parts.len() > 1 {
-            Field::undefined_with_interval
+            Field::undefined_without_interval
         } else {
             Field::undefined
         };
         let field = parts.get(0).map_or(undefined_func(""), |x| {
-            Field::from_str(x).unwrap_or(undefined_func(x))
+            Field::parse(x).unwrap_or(undefined_func(x))
         });
         field
     }
@@ -381,21 +208,19 @@ impl Field {
         let parts: Vec<&str> = s.split("|").collect();
         let field = parts
             .get(0)
-            .and_then(|x| Field::from_str(x).ok())
+            .and_then(|x| Field::parse(x).ok())
             .ok_or(anyhow!("parse field error"))?;
-        let interval = parts.get(1).and_then(|x| Interval::parse(x).ok());
+        let interval = parts.get(1).map(|x| Interval::parse_undefined(x));
         Ok((field, interval))
     }
 
     /// Parses a field with interval, returning an undefined field if it fails
     pub fn parse_undefined_with_interval(s: &str) -> (Field, Option<Interval>) {
         let parts: Vec<&str> = s.split("|").collect();
-        let field = parts
-            .get(0)
-            .map_or(Field::undefined_with_interval(""), |x| {
-                Field::from_str(x).unwrap_or(Field::undefined_with_interval(x))
-            });
-        let interval = parts.get(1).and_then(|x| Interval::parse(x).ok());
+        let field = parts.get(0).map_or(Field::undefined(""), |x| {
+            Field::parse(x).unwrap_or(Field::undefined(x))
+        });
+        let interval = parts.get(1).map(|x| Interval::parse_undefined(x));
         (field, interval)
     }
 
@@ -404,8 +229,8 @@ impl Field {
         Field::Undefined(x.to_owned())
     }
 
-    /// Creates an undefined field with interval.
-    pub fn undefined_with_interval(x: &str) -> Field {
+    /// Creates an undefined field without interval.
+    pub fn undefined_without_interval(x: &str) -> Field {
         Field::UndefinedWithoutInterval(x.to_owned())
     }
 
@@ -559,15 +384,28 @@ impl Field {
     }
 }
 
-impl ToString for Field {
-    fn to_string(&self) -> String {
-        self.to_str_ref().to_owned()
-    }
-}
-
 impl AsRef<Field> for Field {
     fn as_ref(&self) -> &Field {
         &self
+    }
+}
+
+impl AsRef<str> for Field {
+    fn as_ref(&self) -> &str {
+        match self {
+            Field::Undefined(x) => x,
+            Field::UndefinedWithoutInterval(x) => x,
+            _ => FieldAttr::find(self)
+                .and_then(|x| Some(x.name))
+                .unwrap_or(""),
+        }
+    }
+}
+
+impl ToString for Field {
+    fn to_string(&self) -> String {
+        let s: &str = self.as_ref();
+        s.to_owned()
     }
 }
 
@@ -638,6 +476,12 @@ impl AsRef<Field> for FieldWithInterval {
     }
 }
 
+impl From<&str> for FieldWithInterval {
+    fn from(s: &str) -> Self {
+        FieldWithInterval::parse_undefined(s)
+    }
+}
+
 impl ToString for FieldWithInterval {
     fn to_string(&self) -> String {
         self.field.to_string_with_interval(&self.interval)
@@ -647,5 +491,78 @@ impl ToString for FieldWithInterval {
 impl std::fmt::Debug for FieldWithInterval {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{}", self.field.to_string_with_interval(&self.interval))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_field() {
+        assert!(Field::parse("undefined").is_err());
+        assert!(matches!(Field::parse("open"), Ok(Field::Open)));
+        assert_eq!(
+            Field::parse_undefined("undefined"),
+            Field::undefined("undefined")
+        );
+    }
+
+    #[test]
+    fn test_field_to_string() {
+        let open_str: &str = Field::Open.as_ref();
+        assert_eq!(open_str, "open");
+        assert_eq!(Field::Open.to_string(), "open");
+
+        let undefined_field = Field::undefined("undefined");
+        let undefined_str: &str = undefined_field.as_ref();
+        assert_eq!(undefined_str, "undefined");
+        assert_eq!(undefined_str.to_string(), "undefined");
+    }
+
+    #[test]
+    fn test_parse_field_with_interval() {
+        assert!(FieldWithInterval::parse("undefined").is_err());
+
+        let open_with_default_interval = FieldWithInterval::new(Field::Open, Interval::default());
+        assert!(
+            matches!(FieldWithInterval::parse("open"), Ok(x) if x == open_with_default_interval)
+        );
+
+        let open_with_1hour = FieldWithInterval::new(Field::Open, Interval::Hour1);
+        assert!(matches!(FieldWithInterval::parse("open|1h"), Ok(x) if x == open_with_1hour));
+        assert!(
+            matches!(FieldWithInterval::parse_with_default_interval("open", &Interval::Hour1), Ok(x) if x == open_with_1hour)
+        );
+
+        let open_with_undefined = FieldWithInterval::new(Field::Open, Interval::undefined("5h"));
+        assert!(matches!(FieldWithInterval::parse("open|5h"), Ok(x) if x == open_with_undefined));
+
+        let undefined_field =
+            FieldWithInterval::new(Field::undefined("undefined"), Interval::undefined("5h"));
+        assert_eq!(
+            FieldWithInterval::parse_undefined("undefined|5h"),
+            undefined_field
+        );
+        assert_eq!(
+            FieldWithInterval::parse_undefined_with_default_interval(
+                "undefined",
+                &Interval::undefined("5h")
+            ),
+            undefined_field
+        );
+    }
+
+    #[test]
+    fn test_field_with_interval_to_string() {
+        let open_with_1hour = FieldWithInterval::new(Field::Open, Interval::Hour1);
+        assert_eq!(open_with_1hour.to_string(), "open|60");
+
+        let open_with_undefined = FieldWithInterval::new(Field::Open, Interval::undefined("5h"));
+        assert_eq!(open_with_undefined.to_string(), "open|5h");
+
+        let undefined_field =
+            FieldWithInterval::new(Field::undefined("undefined"), Interval::undefined("5h"));
+        assert_eq!(undefined_field.to_string(), "undefined|5h");
     }
 }

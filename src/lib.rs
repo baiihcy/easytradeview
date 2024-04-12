@@ -1,5 +1,6 @@
 pub mod analysis;
 pub mod field;
+pub mod field_attr;
 pub mod interval;
 pub mod screener;
 pub mod symbol;
