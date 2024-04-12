@@ -10,7 +10,7 @@ EasyTradeView is a wrapper around the TradingView website's API. It allows users
 Add `EasyTradeView` to your Rust project's `Cargo.toml`:
 ```toml
 [dependencies]
-easytradeview = "0.1.0"
+easytradeview = "0.2.0"
 ```
 ## Usage
 For usage examples, please see the examples directory within this repository. 
