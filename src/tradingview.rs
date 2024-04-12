@@ -107,15 +107,17 @@ impl TradingView {
     }
 
     /// Searches for symbols by given exchanges and types. Retrieves basic fields along with specified extra fields.
-    pub async fn search_symbols<S1, S2>(
+    pub async fn search_symbols<S1, S2, S3>(
         &self,
         exchanges: &[S1],
         types: &[S2],
+        name_filter: S3,
         extra_fields: &[FieldWithInterval],
     ) -> Result<Vec<TimedSymbolValues>>
     where
         S1: AsRef<str>,
         S2: AsRef<str>,
+        S3: AsRef<str>,
     {
         let url = Url::parse(SCANNER_URL)?
             .join(&format!("{}/", self.screener))?
@@ -135,6 +137,7 @@ impl TradingView {
         let types: Vec<&str> = types.iter().map(|x| x.as_ref()).collect();
         let exchanges: Vec<&str> = exchanges.iter().map(|x| x.as_ref()).collect();
         let columns: Vec<String> = fields.iter().map(|x| x.to_string()).collect();
+        let name_filter: &str = name_filter.as_ref();
 
         let data = serde_json::json!({
             "symbols": {
@@ -144,6 +147,13 @@ impl TradingView {
                     "exchanges": exchanges,
                 }
             },
+            "filter": [
+                {
+                    "left": "name",
+                    "operation": "match",
+                    "right": name_filter,
+                }
+            ],
             "columns": columns
         });
 
@@ -273,15 +283,16 @@ mod tests {
     async fn test_search_symbols() -> Result<()> {
         let tradingview = TradingView::new(&Screener::Crypto, "");
         let interval = Interval::Hour1;
-        let exchanges: Vec<&str> = vec!["OKX"];
+        let exchanges: Vec<&str> = vec![];
         let types: Vec<&str> = vec!["spot"];
+        let name_filter = "USDT";
         let extra_fields: Vec<FieldWithInterval> =
             vec![Field::Open, Field::Close, Field::ChangeFromOpen]
                 .into_iter()
                 .map(|x| x.with_interval(&interval))
                 .collect();
         let data = tradingview
-            .search_symbols(&exchanges, &types, extra_fields.as_slice())
+            .search_symbols(&exchanges, &types, name_filter, extra_fields.as_slice())
             .await
             .context("search symbols error")?;
 

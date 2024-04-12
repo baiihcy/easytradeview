@@ -36,6 +36,10 @@ struct SerachArgs {
     #[arg(long)]
     types: Vec<String>,
 
+    /// name filter
+    #[arg(long, default_value = "")]
+    name: String,
+
     #[arg(long, value_parser, num_args = 1.., value_delimiter = ',')]
     fields: Vec<String>,
 }
@@ -88,6 +92,7 @@ async fn main() -> Result<()> {
             let screener = args.screener;
             let exchanges = args.exchanges;
             let types = args.types;
+            let name_filter = args.name;
             // Prepare extra fields if specified
             let extra_fields: Vec<FieldWithInterval> = args
                 .fields
@@ -98,7 +103,7 @@ async fn main() -> Result<()> {
             // Initialize TradingView client and search symbols with given parameters
             let tv = TradingView::new(&screener, "");
             let values = tv
-                .search_symbols(&exchanges, &types, &extra_fields)
+                .search_symbols(&exchanges, &types, name_filter, &extra_fields)
                 .await
                 .context("search symbols error")?;
 
