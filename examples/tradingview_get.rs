@@ -2,7 +2,9 @@ use std::collections::HashMap;
 
 use anyhow::{Context, Result};
 use clap::{Args, Parser, Subcommand};
-use easytradeview::{Field, FieldWithInterval, Interval, Screener, SymbolValues, TradingView};
+use easytradeview::{
+    Field, FieldWithInterval, Interval, Screener, SymbolValues, Table, TradingView,
+};
 use serde_json::{json, Value};
 
 #[derive(Parser)]
@@ -168,32 +170,27 @@ async fn main() -> Result<()> {
                 .context("scan symbols error")?;
 
             // Assemble data rows for output
-            let mut table: Vec<Vec<String>> = vec![];
+            let headers: Vec<String> = vec!["symbol".into()]
+                .into_iter()
+                .chain(fields.iter().map(|x| x.to_string()))
+                .collect();
+            let mut table = Table::new(&headers);
             for vals in symbols {
-                let mut row = vec![format!("\"{}\"", vals.symbol())];
+                let mut row = vec![vals.symbol().to_owned()];
                 for field in fields.iter() {
-                    let val = vals
-                        .values()
-                        .get(&field)
-                        .map_or("".into(), |x| x.to_string());
+                    let val = vals.values().get(&field).map_or("".into(), |x| {
+                        if x.is_f64() {
+                            format!("{:.3}", x.as_f64().unwrap_or(0.0))
+                        } else {
+                            x.to_string()
+                        }
+                    });
                     row.push(val);
                 }
-                table.push(row);
+                table.add_row(&row);
             }
 
-            // Print csv header
-            println!(
-                "symbol,{}",
-                fields
-                    .iter()
-                    .map(|x| x.to_string())
-                    .collect::<Vec<_>>()
-                    .join(",")
-            );
-            // Print csv data rows
-            for vals in table {
-                println!("{}", vals.join(","));
-            }
+            println!("{}", table);
         }
         SubCommand::Get(args) => {
             // Parse arguments
