@@ -26,6 +26,23 @@ impl TradingView {
         }
     }
 
+    /// Creates a new TradingView instance with a custom reqwest::Client.
+    pub fn new_with_client<S1, S2>(
+        screener: S1,
+        exchange: S2,
+        client: reqwest::Client,
+    ) -> TradingView
+    where
+        S1: AsRef<str>,
+        S2: AsRef<str>,
+    {
+        Self {
+            screener: screener.as_ref().to_lowercase(),
+            exchange: exchange.as_ref().to_owned(),
+            client,
+        }
+    }
+
     /// Retrieves the specified fields for a given symbol, with all fields sharing the same interval.
     pub async fn get_symbol_fields<S1, S2>(
         &self,
